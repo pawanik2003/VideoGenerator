@@ -1,13 +1,13 @@
 
 import { GoogleGenAI } from "@google/genai";
 
-const API_KEY = process.env.API_KEY;
+const API_KEY = process.env.GEMINI_API_KEY;
 
 if (!API_KEY) {
   // In a real app, this would be handled more gracefully,
   // but for this context, throwing an error is sufficient.
   // The UI will catch and display a user-friendly message.
-  throw new Error("API_KEY environment variable not set. Please ensure it is configured.");
+  throw new Error("GEMINI_API_KEY environment variable not set. Please ensure it is configured.");
 }
 
 const ai = new GoogleGenAI({ apiKey: API_KEY });
