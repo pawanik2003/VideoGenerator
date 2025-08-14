@@ -5,13 +5,13 @@ const API_KEY = process.env.GEMINI_API_KEY;
 
 let ai: GoogleGenAI | null = null;
 
-if (API_KEY) {
+if (API_KEY && API_KEY.trim() !== '') {
   ai = new GoogleGenAI({ apiKey: API_KEY });
 }
 
 export const generateImage = async (prompt: string): Promise<string> => {
   if (!ai) {
-    throw new Error("GEMINI_API_KEY environment variable not set. Please ensure it is configured.");
+    throw new Error("API key is not configured. Please check your environment variables or contact the administrator.");
   }
 
   try {

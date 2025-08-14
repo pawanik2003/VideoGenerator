@@ -2,7 +2,6 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { generateImage } from './services/geminiService';
 import LoadingSpinner from './components/LoadingSpinner';
-import DebugInfo from './components/DebugInfo';
 
 const App: React.FC = () => {
   const [prompt, setPrompt] = useState<string>('');
@@ -10,10 +9,20 @@ const App: React.FC = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [isAppReady, setIsAppReady] = useState<boolean>(false);
+  const [apiKeyStatus, setApiKeyStatus] = useState<'checking' | 'configured' | 'missing'>('checking');
 
   useEffect(() => {
-    // Set app as ready after component mounts
-    console.log('App component mounted');
+    // Check API key status
+    const checkApiKey = () => {
+      const apiKey = process.env.GEMINI_API_KEY;
+      if (apiKey && apiKey.trim() !== '') {
+        setApiKeyStatus('configured');
+      } else {
+        setApiKeyStatus('missing');
+      }
+    };
+    
+    checkApiKey();
     setIsAppReady(true);
   }, []);
 
@@ -59,6 +68,15 @@ const App: React.FC = () => {
             Pawan's AI Image Generator
           </h1>
           <p className="text-slate-400 mt-2">Bring your creative visions to life with the power of AI.</p>
+          
+          {/* API Key Status */}
+          {apiKeyStatus === 'missing' && (
+            <div className="mt-4 p-3 bg-red-900/50 border border-red-700 rounded-lg">
+              <p className="text-red-300 text-sm">
+                ⚠️ API key is not configured. Image generation will not work.
+              </p>
+            </div>
+          )}
         </header>
 
         <main className="flex flex-col gap-6">
@@ -68,11 +86,11 @@ const App: React.FC = () => {
               onChange={(e) => setPrompt(e.target.value)}
               placeholder="e.g., A majestic lion wearing a crown, photorealistic style"
               className="w-full h-24 sm:h-auto flex-grow p-3 bg-slate-800 border border-slate-700 rounded-lg focus:ring-2 focus:ring-purple-500 focus:outline-none transition duration-200 resize-none placeholder-slate-500"
-              disabled={isLoading}
+              disabled={isLoading || apiKeyStatus === 'missing'}
             />
             <button
               onClick={handleGenerateImage}
-              disabled={isLoading || !prompt.trim()}
+              disabled={isLoading || !prompt.trim() || apiKeyStatus === 'missing'}
               className="w-full sm:w-auto px-6 py-3 bg-purple-600 hover:bg-purple-700 disabled:bg-slate-700 disabled:cursor-not-allowed text-white font-semibold rounded-lg transition duration-200 flex items-center justify-center gap-2 shadow-lg shadow-purple-900/50"
             >
               {isLoading ? 'Generating...' : 'Generate Image'}
@@ -99,13 +117,16 @@ const App: React.FC = () => {
                  <svg xmlns="http://www.w3.org/2000/svg" className="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
-                <p className="mt-2 font-medium">Your generated image will appear here.</p>
+                <p className="mt-2 font-medium">
+                  {apiKeyStatus === 'missing' 
+                    ? 'API key not configured. Please contact administrator.' 
+                    : 'Your generated image will appear here.'}
+                </p>
               </div>
             )}
           </div>
         </main>
       </div>
-      <DebugInfo />
        <style>{`
           @keyframes fade-in {
             0% { opacity: 0; transform: scale(0.95); }
