@@ -3,16 +3,17 @@ import { GoogleGenAI } from "@google/genai";
 
 const API_KEY = process.env.GEMINI_API_KEY;
 
-if (!API_KEY) {
-  // In a real app, this would be handled more gracefully,
-  // but for this context, throwing an error is sufficient.
-  // The UI will catch and display a user-friendly message.
-  throw new Error("GEMINI_API_KEY environment variable not set. Please ensure it is configured.");
+let ai: GoogleGenAI | null = null;
+
+if (API_KEY) {
+  ai = new GoogleGenAI({ apiKey: API_KEY });
 }
 
-const ai = new GoogleGenAI({ apiKey: API_KEY });
-
 export const generateImage = async (prompt: string): Promise<string> => {
+  if (!ai) {
+    throw new Error("GEMINI_API_KEY environment variable not set. Please ensure it is configured.");
+  }
+
   try {
     const response = await ai.models.generateImages({
       model: 'imagen-3.0-generate-002',

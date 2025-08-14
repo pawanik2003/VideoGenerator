@@ -1,13 +1,21 @@
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { generateImage } from './services/geminiService';
 import LoadingSpinner from './components/LoadingSpinner';
+import DebugInfo from './components/DebugInfo';
 
 const App: React.FC = () => {
   const [prompt, setPrompt] = useState<string>('');
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [isAppReady, setIsAppReady] = useState<boolean>(false);
+
+  useEffect(() => {
+    // Set app as ready after component mounts
+    console.log('App component mounted');
+    setIsAppReady(true);
+  }, []);
 
   const handleGenerateImage = useCallback(async () => {
     if (!prompt.trim()) {
@@ -23,6 +31,7 @@ const App: React.FC = () => {
       const url = await generateImage(prompt);
       setImageUrl(url);
     } catch (err) {
+      console.error('Error in handleGenerateImage:', err);
       if (err instanceof Error) {
         setError(err.message);
       } else {
@@ -32,6 +41,15 @@ const App: React.FC = () => {
       setIsLoading(false);
     }
   }, [prompt]);
+
+  // Show loading state while app is initializing
+  if (!isAppReady) {
+    return (
+      <div className="min-h-screen bg-slate-900 text-white flex items-center justify-center">
+        <LoadingSpinner />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-slate-900 text-white flex flex-col items-center p-4 sm:p-6 lg:p-8">
@@ -87,6 +105,7 @@ const App: React.FC = () => {
           </div>
         </main>
       </div>
+      <DebugInfo />
        <style>{`
           @keyframes fade-in {
             0% { opacity: 0; transform: scale(0.95); }
