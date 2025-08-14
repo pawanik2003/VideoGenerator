@@ -1,0 +1,5 @@
+{
+  "name": "Pawan's AI Image Generator",
+  "description": "A minimalist application to generate images from text prompts using Google's Gemini AI.",
+  "requestFramePermissions": []
+}
